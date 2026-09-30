@@ -1,39 +1,112 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Game Hub</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<main id="home" class="view">
-<h1>🎮 Game Hub</h1><p class="h-sub">Pick a game. Your progress is saved on this device.</p>
-<div class="h-stats"><div><b id="hs1">0</b><span>Sudoku levels solved</span></div><div><b id="hs2">1</b><span>Tile Match level</span></div></div>
-<button class="h-card" data-go="sudoku" style="--g1:#3a6ea5;--g2:#5fa0d6"><span class="h-ic">🧩</span><span><strong>Sudoku</strong><em>100 levels · Beginner &amp; Intermediate · answer sheets</em><i id="hp1">0 / 100 solved</i></span></button>
-<button class="h-card" data-go="tile" style="--g1:#d2553d;--g2:#f0955a"><span class="h-ic">🍓</span><span><strong>Tile Match</strong><em>Tap tiles, match 3 in the tray, clear the pile</em><i id="hp2">Level 1</i></span></button>
-</main>
-<main id="sudoku" class="view hide"><button class="back" data-go="home">← Games</button>
-<h1>🧩 Sudoku · 100 Levels</h1>
-<div class="tabs"><button data-t="play" class="on">Play</button><button data-t="levels">Levels</button><button data-t="answers">Answers</button></div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Game Hub</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="home" class="view">
+      <h1>🎮 Game Hub</h1>
+      <p class="h-sub">Pick a game. Your progress is saved on this device.</p>
+      <div class="h-stats">
+        <div><b id="hs1">0</b><span>Sudoku levels solved</span></div>
+        <div><b id="hs2">1</b><span>Tile Match level</span></div>
+      </div>
+      <button
+        class="h-card"
+        data-go="sudoku"
+        style="--g1: #3a6ea5; --g2: #5fa0d6"
+      >
+        <span class="h-ic">🧩</span
+        ><span
+          ><strong>Sudoku</strong
+          ><em>100 levels · Beginner &amp; Intermediate · answer sheets</em
+          ><i id="hp1">0 / 100 solved</i></span
+        >
+      </button>
+      <button
+        class="h-card"
+        data-go="tile"
+        style="--g1: #d2553d; --g2: #f0955a"
+      >
+        <span class="h-ic">🍓</span
+        ><span
+          ><strong>Tile Match</strong
+          ><em>Tap tiles, match 3 in the tray, clear the pile</em
+          ><i id="hp2">Level 1</i></span
+        >
+      </button>
+    </main>
+    <main id="sudoku" class="view hide">
+      <button class="back" data-go="home">← Games</button>
+      <h1>🧩 Sudoku · 100 Levels</h1>
+      <div class="tabs">
+        <button data-t="play" class="on">Play</button
+        ><button data-t="levels">Levels</button
+        ><button data-t="answers">Answers</button>
+      </div>
 
-<section id="play">
- <div class="bar"><span>Level <b id="lvn">1</b> <span id="lvb" class="badge b">Beginner</span></span><span id="tm">0:00</span></div>
- <div id="board"></div>
- <div class="pad" id="pad"></div>
- <div class="act"><button id="note">✏️ Notes</button><button id="er">Erase</button><button id="hint">💡 Hint</button><button id="nx">Next ▶</button></div>
- <div class="msg" id="msg"></div>
-</section>
+      <section id="play">
+        <div class="bar">
+          <span
+            >Level <b id="lvn">1</b>
+            <span id="lvb" class="badge b">Beginner</span></span
+          ><span id="tm">0:00</span>
+        </div>
+        <div id="board"></div>
+        <div class="pad" id="pad"></div>
+        <div class="act">
+          <button id="note">✏️ Notes</button><button id="er">Erase</button
+          ><button id="hint">💡 Hint</button><button id="nx">Next ▶</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      </section>
 
-<section id="levels" class="hide"><div class="legend"><span style="color:var(--beg)">■</span> Beginner &nbsp; <span style="color:var(--int)">■</span> Intermediate &nbsp; ✓ = solved</div><div class="lv" id="lv"></div></section>
+      <section id="levels" class="hide">
+        <div class="legend">
+          <span style="color: var(--beg)">■</span> Beginner &nbsp;
+          <span style="color: var(--int)">■</span> Intermediate &nbsp; ✓ =
+          solved
+        </div>
+        <div class="lv" id="lv"></div>
+      </section>
 
-<section id="answers" class="hide"><div class="flt" id="flt"><button data-f="all" class="on">All</button><button data-f="b">Beginner</button><button data-f="i">Intermediate</button></div><div class="ans" id="ans"></div><div class="msg" id="ansmsg"></div></section>
-</main>
-<main id="tile" class="view hide"><button class="back" data-go="home">← Games</button>
-<div class="t-top"><span>Level <b id="t_lvl">1</b></span><span id="t_left"></span></div>
-<div class="t-wrap"><div class="t-board" id="t_board"></div><div class="t-ov hide" id="t_ov"><div id="t_ovt"></div><button id="t_ovb"></button></div></div>
-<div class="t-tray" id="t_tray"></div>
-<div class="t-pw"><button id="t_undo"></button><button id="t_shuf"></button><button id="t_out"></button><button id="t_rst">🔄 Restart</button></div>
-</main>
-<script src="sudoku.js"></script>
-<script src="tile.js"></script>
-<script src="hub.js"></script>
-</body></html>
+      <section id="answers" class="hide">
+        <div class="flt" id="flt">
+          <button data-f="all" class="on">All</button
+          ><button data-f="b">Beginner</button
+          ><button data-f="i">Intermediate</button>
+        </div>
+        <div class="ans" id="ans"></div>
+        <div class="msg" id="ansmsg"></div>
+      </section>
+    </main>
+    <main id="tile" class="view hide">
+      <button class="back" data-go="home">← Games</button>
+      <div class="t-top">
+        <span>Level <b id="t_lvl">1</b></span
+        ><span id="t_left"></span>
+      </div>
+      <div class="t-wrap">
+        <div class="t-board" id="t_board"></div>
+        <div class="t-ov hide" id="t_ov">
+          <div id="t_ovt"></div>
+          <button id="t_ovb"></button>
+        </div>
+      </div>
+      <div class="t-tray" id="t_tray"></div>
+      <div class="t-pw">
+        <button id="t_undo"></button><button id="t_shuf"></button
+        ><button id="t_out"></button><button id="t_rst">🔄 Restart</button>
+      </div>
+    </main>
+    <script src="sudoku.js"></script>
+    <script src="tile.js"></script>
+    <script src="hub.js"></script>
+  </body>
+</html>
