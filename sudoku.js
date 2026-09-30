@@ -1,5 +1,4 @@
 // Sudoku: puzzle generator, solver, game UI, level list and answer sheets.
-// Also defines shared helpers rng() and shuf(), which tile.js uses, so load this file first.
 const N=100;
 const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const shuf=(a,r)=>{for(let i=a.length-1;i>0;i--){const j=r()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
