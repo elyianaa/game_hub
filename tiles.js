@@ -1,13 +1,16 @@
-// Tile Match game. Needs rng() and shuf() from sudoku.js.
+// Tile Match game (self-contained, does not depend on the other JS files).
 (()=>{
 const $=id=>document.getElementById(id),E=['🍎','🍌','🍇','🍓','🍒','🥕','🌽','🍉','🍑','🥝','🍋','🍍'];
+const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const shuf=(a,r)=>{for(let i=a.length-1;i>0;i--){const j=r()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 let sv={lvl:1};try{sv=Object.assign(sv,JSON.parse(localStorage.getItem('tile1')||'{}'))}catch(e){}
 const persist=()=>{try{localStorage.setItem('tile1',JSON.stringify(sv))}catch(e){}};
 let C=6,lvl=sv.lvl,T=[],tray=[],hist=[],pw={},busy=false,over=false;
 const blocked=t=>T.some(o=>o.s==='b'&&o.l>t.l&&Math.abs(o.x-t.x)<1&&Math.abs(o.y-t.y)<1);
 const AN=[[1,21],[10,60],[20,90],[30,150],[40,210],[50,300]];
 function size(n){if(n>50)return 450;let i=0;while(n>AN[i+1][0])i++;const[l0,t0]=AN[i],[l1,t1]=AN[i+1];return Math.round((t0+(t1-t0)*(n-l0)/(l1-l0))/3)*3}
-function start(n){lvl=n;over=false;busy=false;tray=[];hist=[];pw={u:2,s:1,o:1};$('t_ov').classList.add('hide');
+function start(n){try{begin(n)}catch(err){$('t_board').textContent='Tile Match error: '+err.message;console.error(err)}}
+function begin(n){lvl=n;over=false;busy=false;tray=[];hist=[];pw={u:2,s:1,o:1};$('t_ov').classList.add('hide');
  const r=rng(n*104729+7),total=size(n),tri=total/3,kinds=Math.min(12,3+Math.ceil(n*.9));C=total<=90?6:total<=150?7:total<=210?8:total<=300?9:10;const L=Math.max(2,Math.ceil(total/(.55*C*C)));
  const ks=[];for(let i=0;i<tri;i++)ks.push(i%kinds);const pool=shuf([...ks,...ks,...ks],r);
  T=[];let left=total;
