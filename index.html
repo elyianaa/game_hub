@@ -58,11 +58,15 @@
             <span id="lvb" class="badge b">Beginner</span></span
           ><span id="tm">0:00</span>
         </div>
-        <div id="board"></div>
+        <div class="bw">
+          <div id="board"></div>
+          <div id="pov" class="hide">⏸ Paused<span>Tap to resume</span></div>
+        </div>
         <div class="pad" id="pad"></div>
         <div class="act">
           <button id="note">✏️ Notes</button><button id="er">Erase</button
-          ><button id="hint">💡 Hint</button><button id="nx">Next ▶</button>
+          ><button id="hint">💡 Hint</button><button id="pause">⏸ Pause</button
+          ><button id="rp">🔁 Replay</button><button id="nx">Next ▶</button>
         </div>
         <div class="msg" id="msg"></div>
       </section>
@@ -106,7 +110,7 @@
       </div>
     </main>
     <script src="sudoku.js"></script>
-    <script src="tiles.js"></script>
+    <script src="tile.js"></script>
     <script src="hub.js"></script>
   </body>
 </html>
