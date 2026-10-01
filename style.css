@@ -185,9 +185,32 @@ h1 {
 }
 .act {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   margin-top: 6px;
+}
+.bw {
+  position: relative;
+}
+#pov {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--card);
+  border: 2px solid var(--thick);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 5;
+}
+#pov span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--mute);
 }
 .act button {
   font-size: 13px;
