@@ -146,6 +146,8 @@ let lv = 1,
   noteMode = false,
   t0 = 0,
   started = false,
+  paused = false,
+  pauseAt = 0,
   tick,
   won = false,
   hints = 0,
@@ -156,6 +158,26 @@ const startTimer = () => {
     t0 = Date.now();
   }
 };
+function setPause(on) {
+  if (won || on === paused) return;
+  paused = on;
+  if (on) pauseAt = Date.now();
+  else if (started) t0 += Date.now() - pauseAt;
+  $("pov").classList.toggle("hide", !on);
+  $("pause").textContent = on ? "▶ Resume" : "⏸ Pause";
+}
+function tickFn() {
+  if (!started || won || paused) return;
+  if (
+    ["sudoku", "play"].some((id) =>
+      document.getElementById(id).classList.contains("hide"),
+    )
+  ) {
+    setPause(true);
+    return;
+  }
+  $("tm").textContent = fmt(((Date.now() - t0) / 1000) | 0);
+}
 try {
   save = JSON.parse(localStorage.getItem("sdk100") || "{}");
 } catch (e) {}
@@ -166,15 +188,23 @@ const persist = () => {
 };
 const fmt = (s) => ((s / 60) | 0) + ":" + String(s % 60).padStart(2, "0");
 
-function load(l) {
+function load(l, replay) {
   lv = l;
-  const q = gen(l);
-  u = q.p.slice();
+  const q = gen(l),
+    done = save[l] && !replay;
+  u = (done ? q.s : q.p).slice();
   notes = Array(81).fill(0);
   sel = -1;
-  won = false;
+  won = !!done;
   hints = 0;
-  $("msg").textContent = "";
+  paused = false;
+  $("pov").classList.add("hide");
+  $("pause").textContent = "⏸ Pause";
+  $("msg").textContent = done
+    ? "✅ Completed · best time " +
+      fmt(save[l]) +
+      ". Tap Replay to solve it again."
+    : "";
   $("lvn").textContent = l;
   const b = $("lvb");
   b.textContent = q.beg ? "Beginner" : "Intermediate";
@@ -182,11 +212,8 @@ function load(l) {
   started = false;
   t0 = 0;
   clearInterval(tick);
-  tick = setInterval(() => {
-    if (started && !won)
-      $("tm").textContent = fmt(((Date.now() - t0) / 1000) | 0);
-  }, 500);
-  $("tm").textContent = "0:00";
+  tick = setInterval(tickFn, 500);
+  $("tm").textContent = done ? "✓ " + fmt(save[l]) : "0:00";
   draw();
   showTab("play");
 }
@@ -240,6 +267,7 @@ function draw() {
       d.innerHTML = h + "</div>";
     }
     d.onclick = () => {
+      if (paused) return;
       startTimer();
       sel = i;
       draw();
@@ -253,7 +281,7 @@ function checkWin() {
   const q = gen(lv);
   if (u.every((x, i) => x === q.s[i])) {
     won = true;
-    const t = ((Date.now() - t0) / 1000) | 0;
+    const t = Math.max(1, ((Date.now() - t0) / 1000) | 0);
     if (!save[lv] || t < save[lv]) save[lv] = t;
     persist();
     $("msg").textContent =
@@ -265,7 +293,7 @@ function checkWin() {
   }
 }
 function put(v) {
-  if (sel < 0 || won) return;
+  if (sel < 0 || won || paused) return;
   startTimer();
   const q = gen(lv);
   if (q.p[sel]) return;
@@ -292,7 +320,7 @@ $("note").onclick = (e) => {
   e.target.classList.toggle("on", noteMode);
 };
 $("hint").onclick = () => {
-  if (won) return;
+  if (won || paused) return;
   startTimer();
   const q = gen(lv);
   let i = sel;
@@ -309,6 +337,25 @@ $("hint").onclick = () => {
   draw();
 };
 $("nx").onclick = () => load((lv % N) + 1);
+$("pause").onclick = () => setPause(!paused);
+$("pov").onclick = () => setPause(false);
+let rpArm = 0;
+$("rp").onclick = () => {
+  const q = gen(lv),
+    dirty = !won && u.some((x, i) => x !== q.p[i]);
+  if (dirty && !rpArm) {
+    rpArm = setTimeout(() => {
+      rpArm = 0;
+      $("rp").textContent = "🔁 Replay";
+    }, 2500);
+    $("rp").textContent = "Tap again to reset";
+    return;
+  }
+  clearTimeout(rpArm);
+  rpArm = 0;
+  $("rp").textContent = "🔁 Replay";
+  load(lv, true);
+};
 document.addEventListener("keydown", (e) => {
   if (
     $("sudoku").classList.contains("hide") ||
