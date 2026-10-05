@@ -284,6 +284,7 @@ function checkWin() {
     const t = Math.max(1, ((Date.now() - t0) / 1000) | 0);
     if (!save[lv] || t < save[lv]) save[lv] = t;
     persist();
+    window.GH && GH.submit("sudoku", Object.keys(save).length);
     $("msg").textContent =
       "🎉 Solved in " +
       fmt(t) +
