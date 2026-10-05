@@ -509,3 +509,54 @@ h1 {
   color: #fff;
   border-color: var(--acc);
 }
+.h-lb {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+}
+.h-lb h2 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+.h-nick {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.h-nick input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+}
+.h-nick button {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--acc);
+  color: #fff;
+  cursor: pointer;
+}
+.lb-list {
+  font-size: 14px;
+  color: var(--mute);
+}
+.lb-row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+.lb-row.me {
+  background: var(--sel);
+  border-radius: 6px;
+  font-weight: 600;
+}
