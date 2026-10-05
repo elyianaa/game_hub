@@ -21,7 +21,10 @@
   function go(v) {
     V.forEach((k) => $(k).classList.toggle("hide", k !== v));
     window.scrollTo(0, 0);
-    if (v === "home") stats();
+    if (v === "home") {
+      stats();
+      window.GH && GH.refresh();
+    }
   }
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-go]");
