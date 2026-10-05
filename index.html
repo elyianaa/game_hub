@@ -41,6 +41,23 @@
           ><i id="hp2">Level 1</i></span
         >
       </button>
+      <section id="lb_card" class="h-lb hide">
+        <h2>🏆 Leaderboard</h2>
+        <div class="h-nick">
+          <input
+            id="lb_name"
+            maxlength="15"
+            placeholder="Your nickname"
+            autocomplete="off"
+          /><button id="lb_save">Save</button>
+        </div>
+        <div class="flt">
+          <button data-g="sudoku" class="on">🧩 Sudoku</button
+          ><button data-g="tile">🍓 Tile Match</button>
+        </div>
+        <div class="legend" id="lb_unit"></div>
+        <div class="lb-list" id="lb_list"></div>
+      </section>
     </main>
     <main id="sudoku" class="view hide">
       <button class="back" data-go="home">← Games</button>
@@ -111,6 +128,7 @@
     </main>
     <script src="sudoku.js"></script>
     <script src="tile.js"></script>
+    <script src="leaderboard.js"></script>
     <script src="hub.js"></script>
   </body>
 </html>
