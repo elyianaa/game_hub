@@ -560,3 +560,32 @@ h1 {
   border-radius: 6px;
   font-weight: 600;
 }
+.h-warn {
+  background: var(--err);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.t-ovs {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.9;
+  padding: 0 12px;
+}
+.t-dep {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: calc(100% - 3px);
+  height: calc(var(--n) * 3px);
+  background: repeating-linear-gradient(
+    to top,
+    var(--thick) 0 1px,
+    var(--line) 1px 3px
+  );
+  border-radius: 3px 3px 0 0;
+  opacity: 0.85;
+  pointer-events: none;
+}
