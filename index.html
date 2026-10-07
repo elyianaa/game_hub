@@ -13,6 +13,11 @@
     <main id="home" class="view">
       <h1>🎮 Game Hub</h1>
       <p class="h-sub">Pick a game. Your progress is saved on this device.</p>
+      <div id="h_warn" class="h-warn hide">
+        ⚠️ Your browser is blocking storage, so progress and scores cannot be
+        saved. Open this page in Chrome or Safari (not inside another app) and
+        turn off private mode.
+      </div>
       <div class="h-stats">
         <div><b id="hs1">0</b><span>Sudoku levels solved</span></div>
         <div><b id="hs2">1</b><span>Tile Match level</span></div>
@@ -117,6 +122,7 @@
         <div class="t-board" id="t_board"></div>
         <div class="t-ov hide" id="t_ov">
           <div id="t_ovt"></div>
+          <div id="t_ovs" class="t-ovs"></div>
           <button id="t_ovb"></button>
         </div>
       </div>
