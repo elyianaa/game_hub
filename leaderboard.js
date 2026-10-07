@@ -1,6 +1,7 @@
 // Optional global leaderboard using a Google Sheet + Apps Script (see README).
 // Paste your Apps Script Web app URL below. Leave it empty to hide the leaderboard.
-const API_URL = "https://script.google.com/macros/s/AKfycbxBWzBKk6MM5OgfzzhkGkxabAZ_BTKdqA-NWjcUTHc3K5zud9rt1rSkXVnwZJZg5guR/exec";
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbxBWzBKk6MM5OgfzzhkGkxabAZ_BTKdqA-NWjcUTHc3K5zud9rt1rSkXVnwZJZg5guR/exec";
 (() => {
   const $ = (id) => document.getElementById(id),
     on = !!API_URL;
@@ -30,11 +31,14 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxBWzBKk6MM5OgfzzhkGkxa
     }
   }
   async function submit(g, score) {
-    if (!on || !nick() || !(score > 0)) return;
+    if (!on || !nick() || !(score > 0)) return null;
     try {
-      await call({ action: "submit", game: g, name: nick(), score });
+      const r = await call({ action: "submit", game: g, name: nick(), score });
       if (g === game) load();
-    } catch (e) {}
+      return !!r.ok;
+    } catch (e) {
+      return false;
+    }
   }
   function render(list) {
     const box = $("lb_list"),
