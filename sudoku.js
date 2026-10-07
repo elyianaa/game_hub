@@ -181,14 +181,26 @@ function tickFn() {
 try {
   save = JSON.parse(localStorage.getItem("sdk100") || "{}");
 } catch (e) {}
+const syncSave = () => {
+  try {
+    const o = JSON.parse(localStorage.getItem("sdk100") || "{}");
+    for (const k in o) if (!save[k] || o[k] < save[k]) save[k] = o[k];
+  } catch (e) {}
+}; // pull in levels solved in another tab
 const persist = () => {
   try {
-    localStorage.setItem("sdk100", JSON.stringify(save));
-  } catch (e) {}
+    syncSave();
+    const v = JSON.stringify(save);
+    localStorage.setItem("sdk100", v);
+    return localStorage.getItem("sdk100") === v;
+  } catch (e) {
+    return false;
+  }
 };
 const fmt = (s) => ((s / 60) | 0) + ":" + String(s % 60).padStart(2, "0");
 
 function load(l, replay) {
+  syncSave();
   lv = l;
   const q = gen(l),
     done = save[l] && !replay;
@@ -283,13 +295,14 @@ function checkWin() {
     won = true;
     const t = Math.max(1, ((Date.now() - t0) / 1000) | 0);
     if (!save[lv] || t < save[lv]) save[lv] = t;
-    persist();
+    const saved = persist();
     window.GH && GH.submit("sudoku", Object.keys(save).length);
     $("msg").textContent =
       "🎉 Solved in " +
       fmt(t) +
       (hints ? " with " + hints + " hint(s)" : "") +
-      "!";
+      "!" +
+      (saved ? "" : " ⚠️ Could not save progress on this device");
     buildLevels();
   }
 }
