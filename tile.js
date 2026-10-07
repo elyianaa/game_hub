@@ -1,8 +1,20 @@
 // Tile Match game (self-contained, does not depend on the other JS files).
 (() => {
   const $ = (id) => document.getElementById(id),
-    E = ["🍎","🍌","🍇","🍓","🍒","🥕","🌽","🍉","🍑","🥝","🍋","🍍",];
-  
+    E = [
+      "🍎",
+      "🍌",
+      "🍇",
+      "🍓",
+      "🍒",
+      "🥕",
+      "🌽",
+      "🍉",
+      "🍑",
+      "🥝",
+      "🍋",
+      "🍍",
+    ];
   const rng = (s) => () => {
     s |= 0;
     s = (s + 0x6d2b79f5) | 0;
@@ -23,9 +35,18 @@
   } catch (e) {}
   const persist = () => {
     try {
-      localStorage.setItem("tile1", JSON.stringify(sv));
-    } catch (e) {}
-  };
+      let o = {};
+      try {
+        o = JSON.parse(localStorage.getItem("tile1") || "{}");
+      } catch (e) {}
+      if (o.lvl > sv.lvl) sv.lvl = o.lvl; // keep the highest level, even if another tab saved more
+      const v = JSON.stringify(sv);
+      localStorage.setItem("tile1", v);
+      return localStorage.getItem("tile1") === v;
+    } catch (e) {
+      return false;
+    }
+  }; // true only if it really saved
   let C = 6,
     lvl = sv.lvl,
     T = [],
@@ -164,6 +185,116 @@
     }
     return T;
   }
+  // Level 26+ "Shopee style": a few tall TOWERS at the bottom, a small hidden PATTERN of stacks in the middle,
+  // and a layer of RANDOM tiles on top that hides the pattern until the player clears them.
+  function layoutS(total, r, MAXL, key, n) {
+    const R = C + 1,
+      T = [],
+      m = MASK[key],
+      ov = (a, b) => Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1;
+    const H = [
+        [0.5, 0],
+        [-0.5, 0],
+        [0, 0.5],
+        [0, -0.5],
+        [0.5, 0.5],
+        [-0.5, 0.5],
+        [0.5, -0.5],
+        [-0.5, -0.5],
+      ],
+      all = new Set(),
+      pat = new Set();
+    for (let x = 0; x <= C - 1; x += 0.5)
+      for (let y = 0; y <= R - 1; y += 0.5) {
+        all.add(x + "|" + y); // the pattern is a smaller shape, a little above the middle
+        if (
+          m(
+            (((x + 0.5) / C) * 2 - 1) / 0.8,
+            (((y + 0.5) / R) * 2 - 1 + 0.12) / 0.8,
+            Math.floor(x),
+            Math.floor(y),
+          )
+        )
+          pat.add(x + "|" + y);
+      }
+    const put = (x, y, cap, allow, tw) => {
+      if (
+        x < 0 ||
+        y < 0 ||
+        x > C - 1 ||
+        y > R - 1 ||
+        (allow && !allow.has(x + "|" + y))
+      )
+        return false;
+      const t = { x, y, l: 0, k: 0, s: "b" };
+      if (tw != null) t.tw = tw;
+      let l = 0;
+      for (const o of T)
+        if (ov(o, t)) {
+          if (tw == null && o.tw != null) return false;
+          if (o.l >= l) l = o.l + 1;
+        } // only towers may touch towers
+      if (l > cap) return false;
+      t.l = l;
+      T.push(t);
+      return true;
+    };
+    const grow = (cnt, allow, cap) => {
+      const list = [...allow].map((k) => k.split("|").map(Number)),
+        spots = [],
+        goal = T.length + cnt;
+      if (!list.length) return;
+      for (let g = 0; T.length < goal && g < 8000; g++) {
+        const p = r();
+        let ok = false;
+        if (spots.length && p < 0.55) {
+          const s = spots[(r() * spots.length) | 0],
+            d = p < 0.25 ? [0, 0] : H[(r() * 8) | 0];
+          ok = put(s[0] + d[0], s[1] + d[1], cap, allow);
+          if (ok) spots.push([s[0] + d[0], s[1] + d[1]]);
+        }
+        if (!ok) {
+          let b = list[0],
+            bd = -1;
+          for (let i = 0; i < 8; i++) {
+            const c = list[(r() * list.length) | 0];
+            let dd = 9e9;
+            for (const s of spots)
+              dd = Math.min(dd, (s[0] - c[0]) ** 2 + (s[1] - c[1]) ** 2);
+            if (dd > bd) {
+              bd = dd;
+              b = c;
+            }
+          }
+          if (put(b[0], b[1], cap, allow)) spots.push(b);
+        }
+      }
+    };
+    const nT = n < 36 ? 2 : 3,
+      h = Math.min(10, 4 + ((n - 26) >> 2)),
+      xs = nT === 2 ? [1, C - 2] : [0.5, (C - 1) / 2, C - 1.5];
+    for (let i = 0; i < nT; i++)
+      for (let j = 0; j < h; j++) put(xs[i], R - 1, 99, null, i);
+    const rem = total - T.length,
+      nB = Math.round(rem * 0.45);
+    grow(nB, pat, Math.max(3, Math.round(MAXL / 2))); // hidden pattern: ~45% of the other tiles
+    grow(rem - nB, all, MAXL); // random tiles on top: the rest
+    return T;
+  }
+  // Grey edges above the top tile of a tower show how many tiles are left under it.
+  function dep(t) {
+    if (t.tw == null) return "";
+    let c = 0,
+      top = -1;
+    for (const o of T)
+      if (o.s === "b" && o.tw === t.tw) {
+        c++;
+        if (o.l > top) top = o.l;
+      }
+    return t.l === top && c > 1
+      ? `<div class="t-dep" style="--n:${Math.min(c - 1, 9)}"></div>`
+      : "";
+  }
   function begin(n) {
     lvl = n;
     over = false;
@@ -190,7 +321,10 @@
                 : 10;
     let cap = Math.min(12, 3 + (n >> 2));
     for (C = base; ; C++) {
-      T = layout(want, r, cap, pat[1]);
+      T =
+        n >= 26
+          ? layoutS(want, r, cap, pat[1], n)
+          : layout(want, r, cap, pat[1]);
       if (T.length >= want) break;
       if (C >= 10) {
         if (cap > 80) break;
@@ -238,7 +372,7 @@
       .sort((a, b) => a.l - b.l)
       .map(
         (t) =>
-          `<div class="t-tile${blocked(t) ? " blk" : ""}" data-i="${T.indexOf(t)}" style="left:${(t.x / C) * 100}%;top:${(t.y / (C + 1)) * 100}%;width:${100 / C}%;height:${100 / (C + 1)}%;z-index:${t.l + 1}"><div class="t-face">${E[t.k]}</div></div>`,
+          `<div class="t-tile${blocked(t) ? " blk" : ""}" data-i="${T.indexOf(t)}" style="left:${(t.x / C) * 100}%;top:${(t.y / (C + 1)) * 100}%;width:${100 / C}%;height:${100 / (C + 1)}%;z-index:${t.l + 1}">${dep(t)}<div class="t-face">${E[t.k]}</div></div>`,
       )
       .join("");
     $("t_tray").innerHTML = Array.from({ length: 7 }, (_, i) => {
@@ -261,10 +395,22 @@
     b.textContent = win ? "Next level ▶" : "Try again";
     b.onclick = () => start(win ? lvl + 1 : lvl);
     $("t_ov").classList.remove("hide");
+    const s2 = $("t_ovs");
+    s2.textContent = "";
+    s2._n = (s2._n || 0) + 1;
+    const my = s2._n;
     if (win) {
       sv.lvl = Math.max(sv.lvl, lvl + 1);
-      persist();
-      window.GH && GH.submit("tile", sv.lvl - 1);
+      s2.textContent = persist()
+        ? "Progress saved on this device ✓"
+        : "⚠️ Could not save progress on this device";
+      if (window.GH)
+        GH.submit("tile", sv.lvl - 1).then((ok) => {
+          if (s2._n !== my) return;
+          if (ok === true) s2.textContent += " · Leaderboard updated ✓";
+          else if (ok === false)
+            s2.textContent += " · ⚠️ Score not sent, check your connection";
+        });
     }
   }
   $("t_board").onclick = (e) => {
@@ -321,6 +467,7 @@
     t.x = ((Math.random() * (C * 2 - 1)) | 0) / 2;
     t.y = ((Math.random() * (R * 2 - 1)) | 0) / 2;
     t.l = 0;
+    t.tw = null;
     for (const o of T)
       if (
         o.s === "b" &&
