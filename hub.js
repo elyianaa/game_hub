@@ -30,5 +30,15 @@
     const b = e.target.closest("[data-go]");
     if (b) go(b.dataset.go);
   });
+  try {
+    localStorage.setItem("gh_t", "1");
+    localStorage.removeItem("gh_t");
+  } catch (e) {
+    $("h_warn").classList.remove("hide");
+  } // storage blocked: progress cannot be saved
   stats();
+  window.addEventListener("storage", stats);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) stats();
+  }); // refresh when progress changes in another tab
 })();
