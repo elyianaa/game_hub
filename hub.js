@@ -15,7 +15,7 @@
       l = t.lvl || 1;
     $("hs1").textContent = n;
     $("hs2").textContent = l;
-    $("hp1").textContent = n + " / 100 solved";
+    $("hp1").textContent = n + " / 200 solved";
     $("hp2").textContent = "Level " + l;
   }
   function go(v) {
