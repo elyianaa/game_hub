@@ -1,7 +1,7 @@
 // Game Hub leaderboard backend (Google Apps Script).
 // Paste this into Extensions > Apps Script inside a Google Sheet, then deploy as a Web app (see README).
 const SHEET = 'scores';
-const MAX = { sudoku: 100, tile: 1000 };   // highest allowed score per game
+const MAX = { sudoku: 200, tile: 1000 };   // highest allowed score per game
 const TOP = 20;                            // how many players the leaderboard shows
 
 function doGet(e) {
