@@ -1,20 +1,7 @@
 // Tile Match game (self-contained, does not depend on the other JS files).
 (() => {
   const $ = (id) => document.getElementById(id),
-    E = [
-      "🍎",
-      "🍌",
-      "🍇",
-      "🍓",
-      "🍒",
-      "🥕",
-      "🌽",
-      "🍉",
-      "🍑",
-      "🥝",
-      "🍋",
-      "🍍",
-    ];
+    E = ["🍕","🥗","🎂","🥨","🥐","🍣","🍝","🍧","🍲","🍔","🌮","🥪",];
   const rng = (s) => () => {
     s |= 0;
     s = (s + 0x6d2b79f5) | 0;
@@ -78,6 +65,45 @@
     const [l0, t0] = AN[i],
       [l1, t1] = AN[i + 1];
     return Math.round((t0 + ((t1 - t0) * (n - l0)) / (l1 - l0)) / 3) * 3;
+  }
+  // ---- Sound effects: made in the browser with the Web Audio API (no audio files) ----
+  // One match = a soft two-note "ding". Matches made within COMBO_MS of each other are a combo (x2, x3, ...) = a sparkly chime, the same for every combo.
+  const COMBO_MS = 5000;
+  let actx = null,
+    snd = true,
+    combo = 0,
+    lastMatch = 0;
+  try {
+    snd = localStorage.getItem("tile_snd") !== "off";
+  } catch (e) {}
+  function tone(f, t0, dur, type, vol) {
+    const o = actx.createOscillator(),
+      g = actx.createGain();
+    o.type = type;
+    o.frequency.value = f;
+    o.connect(g);
+    g.connect(actx.destination);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    o.start(t0);
+    o.stop(t0 + dur + 0.02);
+  }
+  function playMatch(n) {
+    if (!snd) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+      const t = actx.currentTime + 0.01;
+      if (n < 2) {
+        tone(784, t, 0.18, "triangle", 0.25);
+        tone(1175, t + 0.09, 0.28, "triangle", 0.25);
+      } else
+        [1047, 1319, 1568, 2093].forEach((f, i) => {
+          tone(f, t + i * 0.07, 0.3, "sine", 0.22);
+          tone(f * 2, t + i * 0.07, 0.15, "sine", 0.06);
+        });
+    } catch (e) {}
   }
   function start(n) {
     try {
@@ -299,6 +325,8 @@
     lvl = n;
     over = false;
     busy = false;
+    combo = 0;
+    lastMatch = 0;
     tray = [];
     hist = [];
     pw = { u: 2, s: 1, o: 1 };
@@ -425,6 +453,10 @@
     const m = tray.filter((x) => x.k === t.k).slice(0, 3);
     if (m.length === 3) {
       busy = true;
+      const now = Date.now();
+      combo = combo > 0 && now - lastMatch < COMBO_MS ? combo + 1 : 1;
+      lastMatch = now;
+      playMatch(combo);
       m.forEach((x) => (x.pop = 1));
       render();
       setTimeout(() => {
@@ -481,6 +513,15 @@
     render();
   };
   $("t_rst").onclick = () => start(lvl);
+  $("t_snd").textContent = snd ? "🔊" : "🔇";
+  $("t_snd").onclick = () => {
+    snd = !snd;
+    try {
+      localStorage.setItem("tile_snd", snd ? "on" : "off");
+    } catch (e) {}
+    $("t_snd").textContent = snd ? "🔊" : "🔇";
+    if (snd) playMatch(1);
+  }; // sound on/off, remembered
   window.tileStart = (n) => start(n || lvl);
   start(lvl);
 })();
