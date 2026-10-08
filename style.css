@@ -589,3 +589,12 @@ h1 {
   opacity: 0.85;
   pointer-events: none;
 }
+.t-snd {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 2px 12px;
+  font-size: 15px;
+  cursor: pointer;
+}
