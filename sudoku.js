@@ -1,5 +1,5 @@
 // Sudoku: puzzle generator, solver, game UI, level list and answer sheets.
-const N = 100;
+const N = 200;
 const rng = (s) => () => {
   s |= 0;
   s = (s + 0x6d2b79f5) | 0;
@@ -14,7 +14,18 @@ const shuf = (a, r) => {
   }
   return a;
 };
-const isBeg = (l) => l % 5 < 3; // levels 1-3 beginner, 4-5 intermediate, repeating -> 60 / 40
+// Beginner / Intermediate levels are shuffled once with a fixed seed (always the same order): 60% beginner, 40% intermediate.
+const BEG = (() => {
+  const a = [];
+  for (let i = 0; i < N; i++) a.push(i < N * 0.6);
+  shuf(a, rng(2024));
+  if (!a[0]) {
+    a[0] = true;
+    a[a.indexOf(true, 1)] = false;
+  }
+  return a;
+})(); // level 1 is always a beginner level
+const isBeg = (l) => BEG[l - 1];
 const units = [];
 for (let k = 0; k < 9; k++) {
   const r = [],
