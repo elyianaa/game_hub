@@ -579,11 +579,11 @@ h1 {
   left: 4%;
   right: 4%;
   bottom: calc(100% - 3px);
-  height: calc(var(--n) * 3px);
+  height: calc(var(--n) * 2.5px);
   background: repeating-linear-gradient(
     to top,
     var(--thick) 0 1px,
-    var(--line) 1px 3px
+    var(--line) 1px 2.5px
   );
   border-radius: 3px 3px 0 0;
   opacity: 0.85;
