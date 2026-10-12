@@ -1,7 +1,6 @@
 // Optional global leaderboard using a Google Sheet + Apps Script (see README).
 // Paste your Apps Script Web app URL below. Leave it empty to hide the leaderboard.
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxBWzBKk6MM5OgfzzhkGkxabAZ_BTKdqA-NWjcUTHc3K5zud9rt1rSkXVnwZJZg5guR/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxBWzBKk6MM5OgfzzhkGkxabAZ_BTKdqA-NWjcUTHc3K5zud9rt1rSkXVnwZJZg5guR/exec";
 (() => {
   const $ = (id) => document.getElementById(id),
     on = !!API_URL;
