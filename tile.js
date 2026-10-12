@@ -59,7 +59,7 @@
     [50, 300],
   ];
   function size(n) {
-    if (n > 50) return 450;
+    if (n > 50) return 333;
     let i = 0;
     while (n > AN[i + 1][0]) i++;
     const [l0, t0] = AN[i],
@@ -139,14 +139,184 @@
     rows: (u, v, cx, cy) => cy % 2 === 0,
     cols: (u, v, cx, cy) => cx % 2 === 0,
   };
-  // Pattern layout: the shape is drawn with stacks of tiles on a clean grid, so the pattern is easy to see.
-  // Randomness: some cells inside the shape are left empty (never on the outline), and each stack gets a random height
-  // (all heights add up to the level's tile count). Stacks never overlap each other.
+  // Levels 1-25: random + stack layout inside the pattern. Tiles are dropped one by one and always land on top of whatever they overlap:
+  //  25% exactly on an existing spot (a tower, only the top tile is visible),
+  //  30% half a tile off an existing spot (overlaps partly, like bricks),
+  //  45% at a spot far from the others (spreads tiles over the whole shape).
+  // MAXL limits how many tiles can pile up.
+  function layout(total, r, MAXL, key) {
+    const R = C + 1,
+      T = [],
+      spots = [],
+      cand = [],
+      m = MASK[key],
+      ov = (a, b) => Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1;
+    const inside = (x, y) =>
+      m(
+        ((x + 0.5) / C) * 2 - 1,
+        ((y + 0.5) / R) * 2 - 1,
+        Math.floor(x),
+        Math.floor(y),
+      );
+    for (let x = 0; x <= C - 1; x += 0.5)
+      for (let y = 0; y <= R - 1; y += 0.5) if (inside(x, y)) cand.push([x, y]);
+    const H = [
+      [0.5, 0],
+      [-0.5, 0],
+      [0, 0.5],
+      [0, -0.5],
+      [0.5, 0.5],
+      [-0.5, 0.5],
+      [0.5, -0.5],
+      [-0.5, -0.5],
+    ];
+    const put = (x, y) => {
+      if (x < 0 || y < 0 || x > C - 1 || y > R - 1 || !inside(x, y))
+        return false;
+      const t = { x, y, l: 0, k: 0, s: "b" };
+      let l = 0;
+      for (const o of T) if (ov(o, t) && o.l >= l) l = o.l + 1;
+      if (l > MAXL) return false;
+      t.l = l;
+      T.push(t);
+      if (!spots.some((p) => p.x === x && p.y === y)) spots.push({ x, y });
+      return true;
+    };
+    for (let g = 0; T.length < total && g < 12000; g++) {
+      const p = r();
+      let ok = false;
+      if (spots.length && p < 0.25) {
+        const q = spots[(r() * spots.length) | 0];
+        ok = put(q.x, q.y);
+      } else if (spots.length && p < 0.55) {
+        const q = spots[(r() * spots.length) | 0],
+          h = H[(r() * 8) | 0];
+        ok = put(q.x + h[0], q.y + h[1]);
+      }
+      if (!ok) {
+        let b = cand[0],
+          bd = -1;
+        for (let i = 0; i < 8; i++) {
+          const c = cand[(r() * cand.length) | 0];
+          let d = 9e9;
+          for (const q of spots)
+            d = Math.min(d, (q.x - c[0]) ** 2 + (q.y - c[1]) ** 2);
+          if (d > bd) {
+            bd = d;
+            b = c;
+          }
+        }
+        put(b[0], b[1]);
+      }
+    }
+    return T;
+  }
+  // Levels 26-45 "Shopee style": a few tall TOWERS at the bottom, a small hidden PATTERN of stacks in the middle,
+  // and a layer of RANDOM tiles on top that hides the pattern until the player clears them.
+  function layoutS(total, r, MAXL, key, n) {
+    const R = C + 1,
+      T = [],
+      m = MASK[key],
+      ov = (a, b) => Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1;
+    const H = [
+        [0.5, 0],
+        [-0.5, 0],
+        [0, 0.5],
+        [0, -0.5],
+        [0.5, 0.5],
+        [-0.5, 0.5],
+        [0.5, -0.5],
+        [-0.5, -0.5],
+      ],
+      all = new Set(),
+      pat = new Set();
+    for (let x = 0; x <= C - 1; x += 0.5)
+      for (let y = 0; y <= R - 1; y += 0.5) {
+        all.add(x + "|" + y); // the pattern is a smaller shape, a little above the middle
+        if (
+          m(
+            (((x + 0.5) / C) * 2 - 1) / 0.8,
+            (((y + 0.5) / R) * 2 - 1 + 0.12) / 0.8,
+            Math.floor(x),
+            Math.floor(y),
+          )
+        )
+          pat.add(x + "|" + y);
+      }
+    const put = (x, y, cap, allow, tw) => {
+      if (
+        x < 0 ||
+        y < 0 ||
+        x > C - 1 ||
+        y > R - 1 ||
+        (allow && !allow.has(x + "|" + y))
+      )
+        return false;
+      const t = { x, y, l: 0, k: 0, s: "b" };
+      if (tw != null) t.tw = tw;
+      let l = 0;
+      for (const o of T)
+        if (ov(o, t)) {
+          if (tw == null && o.tw != null) return false;
+          if (o.l >= l) l = o.l + 1;
+        } // only towers may touch towers
+      if (l > cap) return false;
+      t.l = l;
+      T.push(t);
+      return true;
+    };
+    const grow = (cnt, allow, cap) => {
+      const list = [...allow].map((k) => k.split("|").map(Number)),
+        spots = [],
+        goal = T.length + cnt;
+      if (!list.length) return;
+      for (let g = 0; T.length < goal && g < 8000; g++) {
+        const p = r();
+        let ok = false;
+        if (spots.length && p < 0.55) {
+          const s = spots[(r() * spots.length) | 0],
+            d = p < 0.25 ? [0, 0] : H[(r() * 8) | 0];
+          ok = put(s[0] + d[0], s[1] + d[1], cap, allow);
+          if (ok) spots.push([s[0] + d[0], s[1] + d[1]]);
+        }
+        if (!ok) {
+          let b = list[0],
+            bd = -1;
+          for (let i = 0; i < 8; i++) {
+            const c = list[(r() * list.length) | 0];
+            let dd = 9e9;
+            for (const s of spots)
+              dd = Math.min(dd, (s[0] - c[0]) ** 2 + (s[1] - c[1]) ** 2);
+            if (dd > bd) {
+              bd = dd;
+              b = c;
+            }
+          }
+          if (put(b[0], b[1], cap, allow)) spots.push(b);
+        }
+      }
+    };
+    const nT = n < 36 ? 2 : 3,
+      h = Math.min(10, 4 + ((n - 26) >> 2)),
+      xs = nT === 2 ? [1, C - 2] : [0.5, (C - 1) / 2, C - 1.5];
+    for (let i = 0; i < nT; i++)
+      for (let j = 0; j < h; j++) put(xs[i], R - 1, 99, null, i);
+    const rem = total - T.length,
+      nB = Math.round(rem * 0.45);
+    grow(nB, pat, Math.max(3, Math.round(MAXL / 2))); // hidden pattern: ~45% of the other tiles
+    grow(rem - nB, all, MAXL); // random tiles on top: the rest
+    return T;
+  }
+  // Level 46+: the shape is drawn with stacks of tiles on a clean grid, so the pattern is easy to see.
+  // Random parts: some cells inside the shape are left empty (never on the outline), every stack gets a random height,
+  // and a few loose tiles (about 4% of the level, 6 to 12) are dropped at random spots on top of the stacks.
   function layoutP(total, r, key) {
     const R = C + 1,
       m = MASK[key],
       cells = [],
-      has = new Set();
+      has = new Set(),
+      loose = Math.max(6, Math.min(12, Math.round(total * 0.04))),
+      stackTotal = total - loose;
     for (let x = 0; x < C; x++)
       for (let y = 0; y < R; y++)
         if (m(((x + 0.5) / C) * 2 - 1, ((y + 0.5) / R) * 2 - 1, x, y)) {
@@ -167,14 +337,14 @@
       inner.slice(0, Math.floor(inner.length * 0.3)).map((q) => q.join("|")),
     ); // ~30% of the inside cells become gaps
     const spots = cells.filter((q) => !gone.has(q.join("|")));
-    if (spots.length > total) {
+    if (spots.length > stackTotal) {
       shuf(spots, r);
-      spots.length = total;
+      spots.length = stackTotal;
     }
     const w = spots.map(() => 0.6 + r() * 0.8),
       sw = w.reduce((a, b) => a + b, 0),
-      hs = w.map((x) => Math.max(1, Math.floor((x / sw) * total)));
-    let d = total - hs.reduce((a, b) => a + b, 0);
+      hs = w.map((x) => Math.max(1, Math.floor((x / sw) * stackTotal)));
+    let d = stackTotal - hs.reduce((a, b) => a + b, 0);
     for (let i = 0; d !== 0; i = (i + 1) % hs.length) {
       if (d > 0) {
         hs[i]++;
@@ -189,6 +359,39 @@
       for (let j = 0; j < hs[s]; j++)
         T.push({ x, y, l: j, k: 0, s: "b", tw: s });
     });
+    const cand = [];
+    for (let x = 0; x <= C - 1; x += 0.5)
+      for (let y = 0; y <= R - 1; y += 0.5)
+        if (
+          (x % 1 || y % 1) &&
+          m(
+            ((x + 0.5) / C) * 2 - 1,
+            ((y + 0.5) / R) * 2 - 1,
+            Math.floor(x),
+            Math.floor(y),
+          )
+        )
+          cand.push([x, y]);
+    const mine = []; // loose tiles sit between the stacks (half-tile offsets), spread apart, on top of whatever they cover
+    for (let i = 0; i < loose; i++) {
+      let c = null;
+      for (let a = 0; a < 30 && !c; a++) {
+        const q = cand[(r() * cand.length) | 0];
+        if (
+          !mine.some(
+            (o) => Math.abs(o.x - q[0]) < 1 && Math.abs(o.y - q[1]) < 1,
+          )
+        )
+          c = q;
+      }
+      c = c || cand[(r() * cand.length) | 0];
+      const t = { x: c[0], y: c[1], l: 0, k: 0, s: "b" };
+      for (const o of T)
+        if (Math.abs(o.x - t.x) < 1 && Math.abs(o.y - t.y) < 1 && o.l >= t.l)
+          t.l = o.l + 1;
+      T.push(t);
+      mine.push(t);
+    }
     return T;
   }
   // Grey edges above the top tile of a stack show roughly how many tiles are left under it (up to 6 lines).
@@ -220,7 +423,19 @@
       kinds = Math.min(12, 3 + Math.ceil(n * 0.9)),
       want = size(n);
     C = want <= 30 ? 5 : 6; // the board never gets wider than 6 tiles, so tiles stay big; extra tiles go into taller stacks
-    T = layoutP(want, r, pat[1]);
+    if (n >= 46)
+      T = layoutP(want, r, pat[1]); // level 46+: pattern of stacks with a few loose tiles on top
+    else {
+      let cap = Math.max(Math.min(12, 3 + (n >> 2)), Math.round(want / 10)); // levels 1-45: random layouts; piles get taller instead of the board getting wider
+      for (; ; cap += 4) {
+        T =
+          n >= 26
+            ? layoutS(want, r, cap, pat[1], n)
+            : layout(want, r, cap, pat[1]);
+        if (T.length >= want || cap > 80) break;
+      }
+    }
+    while (T.length % 3) T.pop();
     const N = T.length,
       ks = [];
     for (let i = 0; i < N / 3; i++) ks.push(i % kinds);
