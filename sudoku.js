@@ -14,7 +14,7 @@ const shuf = (a, r) => {
   }
   return a;
 };
-// Beginner / Intermediate levels are shuffled once with a fixed seed (always the same order): 60% beginner, 40% intermediate.
+// Easy / Medium levels are shuffled once with a fixed seed (always the same order): 60% easy, 40% medium.
 const BEG = (() => {
   const a = [];
   for (let i = 0; i < N; i++) a.push(i < N * 0.6);
@@ -24,7 +24,7 @@ const BEG = (() => {
     a[a.indexOf(true, 1)] = false;
   }
   return a;
-})(); // level 1 is always a beginner level
+})(); // level 1 is always an easy level
 const isBeg = (l) => BEG[l - 1];
 const units = [];
 for (let k = 0; k < 9; k++) {
@@ -230,7 +230,7 @@ function load(l, replay) {
     : "";
   $("lvn").textContent = l;
   const b = $("lvb");
-  b.textContent = q.beg ? "Beginner" : "Intermediate";
+  b.textContent = q.beg ? "Easy" : "Medium";
   b.className = "badge " + (q.beg ? "b" : "i");
   started = false;
   t0 = 0;
@@ -435,7 +435,7 @@ function card(l) {
     '</span><span style="color:var(--' +
     (q.beg ? "beg" : "int") +
     ')">' +
-    (q.beg ? "Beginner" : "Intermediate") +
+    (q.beg ? "Easy" : "Medium") +
     "</span></h4><table>";
   for (let r = 0; r < 9; r++) {
     h += "<tr>";
