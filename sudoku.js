@@ -1,5 +1,5 @@
 // Sudoku: puzzle generator, solver, game UI, level list and answer sheets.
-const N = 200;
+const N = 300;
 const rng = (s) => () => {
   s |= 0;
   s = (s + 0x6d2b79f5) | 0;
@@ -14,17 +14,22 @@ const shuf = (a, r) => {
   }
   return a;
 };
-// Easy / Medium levels are shuffled once with a fixed seed (always the same order): 60% easy, 40% medium.
+// Easy / Medium levels are shuffled once with fixed seeds (always the same order): 60% easy, 40% medium.
+// Levels 1-200 keep their original order, so puzzles players already solved stay the same.
+// Every extra block of 100 levels (201-300, ...) is shuffled on its own.
 const BEG = (() => {
-  const a = [];
-  for (let i = 0; i < N; i++) a.push(i < N * 0.6);
-  shuf(a, rng(2024));
-  if (!a[0]) {
-    a[0] = true;
-    a[a.indexOf(true, 1)] = false;
-  }
-  return a;
-})(); // level 1 is always an easy level
+  const block = (size, seed) => {
+    const a = [];
+    for (let i = 0; i < size; i++) a.push(i < size * 0.6);
+    return shuf(a, rng(seed));
+  };
+  const first = block(200, 2024);
+  if (!first[0]) {
+    first[0] = true;
+    first[first.indexOf(true, 1)] = false;
+  } // level 1 is always an easy level
+  return [...first, ...block(100, 2025)];
+})();
 const isBeg = (l) => BEG[l - 1];
 const units = [];
 for (let k = 0; k < 9; k++) {
