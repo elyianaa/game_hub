@@ -597,4 +597,310 @@ h1 {
   padding: 2px 12px;
   font-size: 15px;
   cursor: pointer;
-} 
+}
+
+/* ========================================
+   GUESS A WORD
+   ======================================== */
+
+/* Guess a Word colour theme (purple) */
+#guess {
+  --gw1: #5b2fa8;
+  --gw2: #8e5fd8;
+  --gw-hit: rgba(142, 95, 216, 0.25);
+  --gw-text: #7a4cc7; /* purple for text, readable on a light background */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #guess {
+    --gw-text: #b794f4;
+  }
+}
+
+:root[data-theme="dark"] #guess {
+  --gw-text: #b794f4;
+}
+
+#guess .wrapper {
+  margin: 8px 0 20px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+#guess .wrapper h1 {
+  margin: 0;
+  padding: 16px 12px;
+  background: linear-gradient(135deg, var(--gw1), var(--gw2));
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+#guess .wrapper .content {
+  padding: 18px 16px 20px;
+}
+
+#guess .gw-instructions {
+  margin: 0 0 14px;
+  color: var(--mute);
+  font-size: 13px;
+  text-align: center;
+}
+
+#guess .typing-input {
+  position: absolute;
+  z-index: -999;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#guess .inputs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px 0 20px;
+  cursor: pointer;
+}
+
+#guess .inputs input {
+  width: clamp(26px, 8vw, 40px);
+  height: 48px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-bottom-width: 4px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 21px;
+  font-weight: 700;
+  pointer-events: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+#guess .inputs input.hit {
+  background: var(--gw-hit);
+  border-color: var(--gw2);
+  animation: gw-pop 0.25s ease;
+}
+
+#guess .inputs input.miss {
+  background: rgba(200, 70, 60, 0.2);
+  border-color: #c8463c;
+}
+
+@keyframes gw-pop {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+#guess .details {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  overflow-wrap: anywhere;
+}
+
+#guess .details p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#guess .details p span {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+#guess .hint-btn {
+  padding: 10px 12px;
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#guess .hint-btn:hover:not(:disabled) {
+  border-color: var(--gw2);
+}
+
+#guess .hint-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#guess .gw-chip {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(200, 70, 60, 0.2);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+#guess .gw-message {
+  min-height: 22px;
+  margin: 0 0 12px;
+  color: var(--mute);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#guess .gw-message.ok {
+  color: var(--gw-text);
+}
+
+#guess .gw-message.bad {
+  color: #d9534f;
+}
+
+#guess .reset-btn {
+  width: 100%;
+  padding: 13px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gw1), var(--gw2));
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#guess .reset-btn:hover {
+  filter: brightness(1.08);
+}
+
+#guess .hint-btn:focus-visible,
+#guess .reset-btn:focus-visible,
+#guess .back:focus-visible {
+  outline: 3px solid var(--acc);
+  outline-offset: 3px;
+}
+
+@media (max-width: 360px) {
+  #guess .wrapper .content {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  #guess .inputs {
+    gap: 3px;
+  }
+
+  #guess .inputs input {
+    width: 25px;
+    height: 40px;
+    font-size: 17px;
+  }
+}
+
+/* ========================================
+   WORD SEARCH
+   ======================================== */
+
+.ws-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.ws-tabs button {
+  flex: 1;
+  padding: 9px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ws-tabs button.on {
+  background: var(--acc);
+  color: #fff;
+  border-color: var(--acc);
+}
+.ws-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  aspect-ratio: 16 / 14;
+  background: var(--card);
+  border: 2px solid var(--thick);
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+.ws-c {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: clamp(11px, 3.5vw, 19px);
+  min-width: 0;
+  cursor: pointer;
+}
+.ws-c.ws-s {
+  box-shadow: inset 0 0 0 2px var(--acc);
+  background: var(--sel);
+}
+.ws-c.ws-p {
+  box-shadow: inset 0 0 0 2px var(--acc);
+}
+.ws-c.ws-h {
+  background: var(--same) !important;
+}
+.ws-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.ws-w {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 12px;
+  background: var(--card);
+}
+.ws-w.f {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+.ws-act {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+}
+.ws-act button {
+  padding: 10px 0;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
