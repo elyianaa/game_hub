@@ -21,6 +21,8 @@
       <div class="h-stats">
         <div><b id="hs1">0</b><span>Sudoku levels solved</span></div>
         <div><b id="hs2">1</b><span>Tile Match level</span></div>
+        <div><b id="hs3">0</b><span>Word Search solved</span></div>
+        <div><b id="hs4">0</b><span>Words Guessed</span></div>
       </div>
       <button
         class="h-card"
@@ -30,8 +32,8 @@
         <span class="h-ic">🧩</span
         ><span
           ><strong>Sudoku</strong
-          ><em>200 levels · Easy &amp; Medium · answer sheets</em
-          ><i id="hp1">0 / 200 solved</i></span
+          ><em>300 levels · Easy &amp; Medium · answer sheets</em
+          ><i id="hp1">0 / 300 solved</i></span
         >
       </button>
       <button
@@ -39,11 +41,35 @@
         data-go="tile"
         style="--g1: #d2553d; --g2: #f0955a"
       >
-        <span class="h-ic">🍓</span
+        <span class="h-ic">🍔</span
         ><span
           ><strong>Tile Match</strong
           ><em>Tap tiles, match 3 in the tray, clear the pile</em
           ><i id="hp2">Level 1</i></span
+        >
+      </button>
+      <button
+        class="h-card"
+        data-go="wordsearch"
+        style="--g1: #2f8f6b; --g2: #58c4a0"
+      >
+        <span class="h-ic">🔎</span
+        ><span
+          ><strong>Word Search</strong
+          ><em>Find 30–40 hidden words in a 16 × 14 grid</em
+          ><i id="hp3">0 / 100 solved</i></span
+        >
+      </button>
+      <button
+        class="h-card"
+        data-go="guess"
+        style="--g1: #5b2fa8; --g2: #8e5fd8"
+      >
+        <span class="h-ic">📝</span
+        ><span
+          ><strong>Guess A Word</strong
+          ><em>Guess a word based on the hint given</em
+          ><i id="hp4">Level 1</i></span
         >
       </button>
       <section id="lb_card" class="h-lb hide">
@@ -56,17 +82,21 @@
             autocomplete="off"
           /><button id="lb_save">Save</button>
         </div>
-        <div class="flt">
-          <button data-g="sudoku" class="on">🧩 Sudoku</button
-          ><button data-g="tile">🍓 Tile Match</button>
+        <div class="flt" id="lb_tabs">
+          <button data-g="sudoku" class="on">🧩 Sudoku</button>
+          <button data-g="tile">🍔 Tile Match</button>
+          <button data-g="wordsearch">🔎 Word Search</button>
+          <button data-g="guess">📝 Guess A Word</button>
         </div>
         <div class="legend" id="lb_unit"></div>
         <div class="lb-list" id="lb_list"></div>
       </section>
     </main>
+
+    <!-- SUDOKU -->
     <main id="sudoku" class="view hide">
       <button class="back" data-go="home">← Games</button>
-      <h1>🧩 Sudoku · 200 Levels</h1>
+      <h1>🧩 Sudoku · 300 Levels</h1>
       <div class="tabs">
         <button data-t="play" class="on">Play</button
         ><button data-t="levels">Levels</button
@@ -96,8 +126,7 @@
       <section id="levels" class="hide">
         <div class="legend">
           <span style="color: var(--beg)">■</span> Easy &nbsp;
-          <span style="color: var(--int)">■</span> Medium &nbsp; ✓ =
-          solved
+          <span style="color: var(--int)">■</span> Medium &nbsp; ✓ = solved
         </div>
         <div class="lv" id="lv"></div>
       </section>
@@ -105,13 +134,14 @@
       <section id="answers" class="hide">
         <div class="flt" id="flt">
           <button data-f="all" class="on">All</button
-          ><button data-f="b">Easy</button
-          ><button data-f="i">Medium</button>
+          ><button data-f="b">Easy</button><button data-f="i">Medium</button>
         </div>
         <div class="ans" id="ans"></div>
         <div class="msg" id="ansmsg"></div>
       </section>
     </main>
+
+    <!-- TILE MATCH -->
     <main id="tile" class="view hide">
       <button class="back" data-go="home">← Games</button>
       <div class="t-top">
@@ -134,8 +164,78 @@
         ><button id="t_out"></button><button id="t_rst">🔄 Restart</button>
       </div>
     </main>
+
+    <main id="wordsearch" class="view hide">
+      <button class="back" data-go="home">← Games</button>
+      <h1>🔎 Word Search</h1>
+      <div class="ws-tabs">
+        <button data-w="play" class="on">Play</button
+        ><button data-w="list">Puzzles</button>
+      </div>
+      <section id="ws_play">
+        <div class="bar">
+          <b id="ws_title">Puzzle 1</b><span id="ws_found">0 / 0</span
+          ><span id="ws_tm">0:00</span>
+        </div>
+        <div class="ws-grid" id="ws_grid"></div>
+        <div class="ws-words" id="ws_words"></div>
+        <div class="ws-act">
+          <button id="ws_hint">💡 Hint</button
+          ><button id="ws_rp">🔁 Restart</button
+          ><button id="ws_nx">Next ▶</button>
+        </div>
+        <div class="msg" id="ws_msg"></div>
+      </section>
+      <section id="ws_list" class="hide">
+        <div class="legend">✓ = solved</div>
+        <div class="lv" id="ws_lv"></div>
+      </section>
+    </main>
+
+    <!-- GUESS A WORD -->
+    <main id="guess" class="view hide">
+      <button class="back" data-go="home">← Games</button>
+
+      <div class="wrapper">
+        <h1>📝 Guess the Word</h1>
+
+        <div class="content">
+          <p class="gw-instructions">
+            Guess the hidden word one letter at a time. Tap the boxes to open
+            your keyboard.
+          </p>
+
+          <input
+            type="text"
+            class="typing-input"
+            maxlength="1"
+            autocomplete="off"
+            aria-label="Enter a letter"
+          />
+
+          <div class="inputs"></div>
+
+          <div class="details">
+            <button type="button" class="hint-btn">
+              💡 Show hint (−1 guess)
+            </button>
+            <p class="hint hide">Hint: <span></span></p>
+            <p class="guess-left">Remaining guesses: <span></span></p>
+            <p class="wrong-letter">Wrong letters: <span></span></p>
+          </div>
+
+          <p class="gw-message" aria-live="polite"></p>
+
+          <button class="reset-btn">New Word</button>
+        </div>
+      </div>
+    </main>
+
     <script src="sudoku.js"></script>
     <script src="tile.js"></script>
+    <script src="wordsearch.js"></script>
+    <script src="word.js"></script>
+    <script src="guessword.js"></script>
     <script src="leaderboard.js"></script>
     <script src="hub.js"></script>
   </body>
