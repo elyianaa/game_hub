@@ -56,7 +56,7 @@
         <span class="h-ic">🔎</span
         ><span
           ><strong>Word Search</strong
-          ><em>Find 30–40 hidden words in a 16 × 14 grid</em
+          ><em>Find hidden words in the grid board</em
           ><i id="hp3">0 / 100 solved</i></span
         >
       </button>
@@ -201,8 +201,7 @@
 
         <div class="content">
           <p class="gw-instructions">
-            Guess the hidden word one letter at a time. Tap the boxes to open
-            your keyboard.
+            Guess the hidden word one letter at a time.
           </p>
 
           <input
@@ -213,14 +212,16 @@
             aria-label="Enter a letter"
           />
 
+          <p class="gw-category">Category: <b></b></p>
+
           <div class="inputs"></div>
 
           <div class="details">
-            <button type="button" class="hint-btn">
-              💡 Show hint (−1 guess)
+            <button type="button" class="hint-btn" disabled>
+              💡 Hint (unlocks at 2 lives left)
             </button>
             <p class="hint hide">Hint: <span></span></p>
-            <p class="guess-left">Remaining guesses: <span></span></p>
+            <p class="guess-left">Lives left: <span></span></p>
             <p class="wrong-letter">Wrong letters: <span></span></p>
           </div>
 
