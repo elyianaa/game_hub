@@ -6,6 +6,7 @@
   const hintLine = root.querySelector(".hint");
   const hintTag = root.querySelector(".hint span");
   const hintBtn = root.querySelector(".hint-btn");
+  const categoryTag = root.querySelector(".gw-category b");
   const livesTag = root.querySelector(".guess-left span");
   const wrongTag = root.querySelector(".wrong-letter span");
   const resetBtn = root.querySelector(".reset-btn");
@@ -62,13 +63,14 @@
   }
 
   function updateHintBtn() {
-    // opening the hint costs one guess, so it is locked on the last guess and when the round is over
-    const locked = gameOver || maxGuesses <= 1;
-    hintBtn.disabled = locked;
-    hintBtn.textContent =
-      !gameOver && maxGuesses <= 1
-        ? "💡 Hint locked (last guess)"
-        : "💡 Show hint (−1 guess)";
+    // The hint stays grey and locked until only 2 lives are left. Opening it still costs 1 life.
+    const open = !gameOver && maxGuesses === 2;
+    hintBtn.disabled = !open;
+    hintBtn.textContent = open
+      ? "💡 Show hint"
+      : !gameOver && maxGuesses > 2
+        ? "💡 Hint (unlocks at 2 lives left)"
+        : "💡 Hint locked";
   }
 
   function setMessage(text, kind) {
@@ -121,6 +123,7 @@
     // the hint stays hidden until the player taps the Show hint button
     hintTag.textContent = item.hint || "No hint available";
     hintLine.classList.add("hide");
+    categoryTag.textContent = item.category || "Random";
     hintBtn.classList.remove("hide");
     updateHintBtn();
     showLives();
@@ -236,14 +239,14 @@
     typingInput.focus();
   });
 
-  // Show hint button
+  // Show hint button: only works when 2 lives are left, and it costs 1 life
   hintBtn.addEventListener("click", () => {
-    if (gameOver || maxGuesses <= 1) return; // the hint costs one guess
+    if (gameOver || maxGuesses !== 2) return;
     maxGuesses--;
     showLives();
     hintLine.classList.remove("hide");
     hintBtn.classList.add("hide");
-    setMessage("Hint opened. It cost you one guess.");
+    setMessage("Hint opened. It cost you one life.");
   });
 
   // Typing input
