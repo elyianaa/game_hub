@@ -660,6 +660,23 @@ h1 {
   pointer-events: none;
 }
 
+#guess .gw-category {
+  margin: 0 0 4px;
+  color: var(--mute);
+  font-size: 13px;
+  text-align: center;
+}
+
+#guess .gw-category b {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: var(--gw-hit);
+  color: var(--gw-text);
+  font-size: 14px;
+}
+
 #guess .inputs {
   display: flex;
   flex-wrap: wrap;
@@ -746,8 +763,16 @@ h1 {
   border-color: var(--gw2);
 }
 
+#guess .hint-btn:not(:disabled) {
+  border-color: var(--gw2);
+  color: var(--gw-text);
+}
+
 #guess .hint-btn:disabled {
-  opacity: 0.55;
+  border-color: var(--line);
+  background: var(--bg);
+  color: var(--mute);
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
